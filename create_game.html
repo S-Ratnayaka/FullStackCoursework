@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block title %}Add Game{% endblock %}
+
+{% block content %}
+<h2>Add New Game</h2>
+<form method="post">
+    Name:<br>
+    <input type="text" name="game_name" required><br>
+    Description:<br>
+    <textarea name="game_description" rows="4" required></textarea><br>
+    Release Date:<br>
+    <input type="date" name="released_date" required><br>
+    Rating:<br>
+    <input type="number" name="rating" min="0" max="10" step="0.1" required><br>
+    <input type="submit" value="Add Game">
+</form>
+{% endblock %}
