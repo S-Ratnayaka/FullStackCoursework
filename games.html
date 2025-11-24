@@ -1,60 +1,76 @@
 {% extends "layout.html" %}
-
 {% block title %}Games{% endblock %}
-
 {% block content %}
 <h1>Games List</h1>
 
 <form method="get" style="margin-bottom:20px; text-align:center;">
-    Name: <input type="text" name="name" id="name" onkeyup="autocomplete()">
-    Year: <input type="number" name="year">
-    Rating >= <input type="number" name="rating" min="0" max="10">
-    <input type="submit" value="Search">
-    <div id="suggestions" class="autocomplete-box"></div>
+  Name:
+  <input type="text" name="name" id="name" autocomplete="off">
+  Year:
+  <input type="number" name="year">
+  Rating >=
+  <input type="number" name="rating" min="0" max="10">
+  <input type="submit" value="Search">
+  <div id="suggestions" class="autocomplete-box"></div>
 </form>
 
 <p style="text-align:center;">{{ num_rows }} record(s) returned</p>
 
 <table>
-<tr>
+  <tr>
     <th>Name</th>
     <th>Description</th>
     <th>Release Date</th>
     <th>Rating</th>
     <th>Actions</th>
-</tr>
-{% for item in results %}
-<tr>
+  </tr>
+  {% for item in results %}
+  <tr>
     <td>{{ item.game_name }}</td>
     <td>{{ item.game_description }}</td>
     <td>{{ item.released_date }}</td>
     <td>{{ item.rating }}</td>
     <td>
-        <a href="edit_game.php?id={{ item.game_id }}">Edit</a> | 
-        <a href="delete_game.php?id={{ item.game_id }}" onclick="return confirm('Delete this game?');">Delete</a>
+      <a href="edit_game.php?id={{ item.game_id }}">Edit</a> |
+      <a href="delete_game.php?id={{ item.game_id }}" onclick="return confirm('Delete this game?');">Delete</a>
     </td>
-</tr>
-{% endfor %}
+  </tr>
+  {% endfor %}
 </table>
 
 <script>
-function autocomplete() {
-    let q = document.getElementById("name").value;
-    if (q.length < 1) { document.getElementById("suggestions").innerHTML = ""; return; }
+document.addEventListener("DOMContentLoaded", () => {
+  const nameInput = document.getElementById("name");
+  const suggestionsBox = document.getElementById("suggestions");
 
-    fetch("ajax_search.php?term=" + q)
-        .then(r => r.json())
-        .then(data => {
-            let box = document.getElementById("suggestions");
-            box.innerHTML = "";
-            data.forEach(item => {
-                let div = document.createElement("div");
-                div.innerText = item;
-                div.onclick = function() { document.getElementById("name").value = item; box.innerHTML = ""; };
-                box.appendChild(div);
-            });
+  function autocomplete() {
+    let q = nameInput.value;
+    if (q.length < 1) {
+      suggestionsBox.innerHTML = "";
+      return;
+    }
+
+    fetch("ajax_search.php?term=" + encodeURIComponent(q))
+      .then(r => r.json())
+      .then(data => {
+        suggestionsBox.innerHTML = "";
+        data.forEach(item => {
+          let div = document.createElement("div");
+          div.innerText = item;
+          div.onclick = function() {
+            nameInput.value = item;
+            suggestionsBox.innerHTML = "";
+          };
+          suggestionsBox.appendChild(div);
         });
-}
-</script>
+      })
+      .catch(err => {
+        console.error("Autocomplete error:", err);
+      });
+  }
 
+  // Attach event listener instead of inline onkeyup
+  nameInput.addEventListener("keyup", autocomplete);
+});
+</script>
 {% endblock %}
